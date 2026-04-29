@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autodiagnóstico de Habilidades Profesionales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink: #1a1814;
+  --paper: #f4ede0;
+  --paper-deep: #ebe2d0;
+  --accent: #c1421f;
+  --accent-deep: #8a2e15;
+  --olive: #6b6740;
+  --gold: #b08d3c;
+  --muted: #7a7468;
+  --line: #2a2620;
+  --shadow: rgba(26, 24, 20, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter Tight', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.55;
+  font-weight: 400;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(192, 66, 31, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 85% 80%, rgba(176, 141, 60, 0.05) 0%, transparent 50%);
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 50px 40px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ═══════ HEADER ═══════ */
+header {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 28px;
+  margin-bottom: 60px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 30px;
+  align-items: end;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+
+h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+
+.meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.8;
+}
+
+.meta strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ═══════ INTRO ═══════ */
+.intro {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 60px;
+  margin-bottom: 70px;
+  align-items: start;
+}
+
+.intro-objetivo h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  margin-bottom: 18px;
+  font-style: italic;
+}
+
+.intro-objetivo p {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.scale-guide {
+  background: var(--paper-deep);
+  border: 1px solid rgba(42, 38, 32, 0.15);
+  padding: 26px 30px;
+  position: relative;
+}
+
+.scale-guide::before {
+  content: 'ESCALA';
+  position: absolute;
+  top: -10px;
+  left: 22px;
+  background: var(--paper);
+  padding: 0 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.scale-guide-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+  color: var(--muted);
+}
+
+.scale-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.scale-item {
+  text-align: center;
+  padding: 10px 6px;
+  border-top: 2px solid var(--line);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.scale-item-num {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.scale-item-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* ═══════ PROGRESS ═══════ */
+.progress-bar {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  padding: 18px 0 14px;
+  margin-bottom: 30px;
+  z-index: 10;
+  border-bottom: 1px solid rgba(42, 38, 32, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.progress-track {
+  flex: 1;
+  height: 2px;
+  background: rgba(42, 38, 32, 0.15);
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.progress-text strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ═══════ SECCIONES ═══════ */
+.section {
+  margin-bottom: 56px;
+  padding-top: 12px;
+}
+
+.section-header {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 24px;
+  margin-bottom: 36px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(42, 38, 32, 0.2);
+  align-items: end;
+}
+
+.section-num {
+  font-family: 'Fraunces', serif;
+  font-size: 4.5rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--accent);
+  line-height: 0.85;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+
+.section-title-block .section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.section-title-block h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 2.2rem;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+.section-desc {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ═══════ ITEMS ═══════ */
+.item {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 40px;
+  padding: 22px 0;
+  border-bottom: 1px dotted rgba(42, 38, 32, 0.2);
+  align-items: center;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item-text {
+  font-size: 1.02rem;
+  line-height: 1.5;
+  display: flex;
+  gap: 14px;
+}
+
+.item-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 500;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.likert {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.likert label {
+  cursor: pointer;
+  position: relative;
+}
+
+.likert input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.likert-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 4px;
+  border: 1px solid rgba(42, 38, 32, 0.25);
+  background: transparent;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 64px;
+}
+
+.likert-btn-num {
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.likert-btn-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.likert label:hover .likert-btn {
+  border-color: var(--accent);
+  background: rgba(192, 66, 31, 0.05);
+}
+
+.likert input:checked + .likert-btn {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.likert input:checked + .likert-btn .likert-btn-num,
+.likert input:checked + .likert-btn .likert-btn-label {
+  color: var(--paper);
+}
+
+/* ═══════ ACCIONES ═══════ */
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 18px 32px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ═══════ RESULTADOS ═══════ */
+.results {
+  display: none;
+  margin-top: 80px;
+  padding-top: 60px;
+  border-top: 4px double var(--line);
+  animation: fadeUp 0.7s ease;
+}
+
+.results.active {
+  display: block;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.results-header .eyebrow {
+  justify-content: center;
+}
+
+.results-header .eyebrow::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.results-header h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 3rem;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+
+.results-header h2 em {
+  font-style: italic;
+  color: var(--accent);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+@media (max-width: 880px) {
+  .summary-grid { grid-template-columns: 1fr; }
+}
+
+.chart-container {
+  background: var(--paper-deep);
+  padding: 36px;
+  position: relative;
+  border: 1px solid rgba(42, 38, 32, 0.15);
+}
+
+.chart-container h3 {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.scores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 18px 22px;
+  background: var(--paper-deep);
+  border-left: 3px solid var(--accent);
+  align-items: center;
+}
+
+.score-row-info h4 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 1.15rem;
+  margin-bottom: 3px;
+}
+
+.score-row-info .score-bar-track {
+  height: 4px;
+  background: rgba(42, 38, 32, 0.15);
+  margin-top: 10px;
+  position: relative;
+  width: 220px;
+  max-width: 100%;
+}
+
+.score-row-info .score-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-row-info .level-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.score-number {
+  font-family: 'Fraunces', serif;
+  font-size: 2.8rem;
+  font-weight: 300;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.score-number .denom {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+/* ═══════ ANÁLISIS ═══════ */
+.analysis {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 60px;
+  margin-bottom: 50px;
+  position: relative;
+}
+
+.analysis::before {
+  content: '"';
+  position: absolute;
+  top: -10px;
+  left: 30px;
+  font-family: 'Fraunces', serif;
+  font-size: 8rem;
+  color: var(--accent);
+  line-height: 1;
+  font-style: italic;
+}
+
+.analysis-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  margin-bottom: 12px;
+  margin-left: 80px;
+}
+
+.analysis h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  margin-left: 80px;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+
+.analysis h3 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.analysis-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-left: 80px;
+}
+
+@media (max-width: 720px) {
+  .analysis { padding: 40px 28px; }
+  .analysis::before { left: 16px; font-size: 5rem; }
+  .analysis h3, .analysis-eyebrow { margin-left: 0; }
+  .analysis-content { grid-template-columns: 1fr; margin-left: 0; }
+}
+
+.analysis-block h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(176, 141, 60, 0.3);
+}
+
+.analysis-block ul {
+  list-style: none;
+}
+
+.analysis-block li {
+  padding: 8px 0 8px 22px;
+  position: relative;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: rgba(244, 237, 224, 0.85);
+}
+
+.analysis-block li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ═══════ REFLEXIÓN ═══════ */
+.reflection {
+  background: var(--paper-deep);
+  padding: 50px;
+  border: 1px solid rgba(42, 38, 32, 0.15);
+  margin-bottom: 40px;
+}
+
+.reflection-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.reflection h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 1.7rem;
+  margin-bottom: 30px;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+
+.reflection h3 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.reflection-question {
+  margin-bottom: 24px;
+}
+
+.reflection-question label {
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.reflection-question textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 14px 16px;
+  border: 1px solid rgba(42, 38, 32, 0.3);
+  background: var(--paper);
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 0.96rem;
+  color: var(--ink);
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.reflection-question textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ═══════ ALERT ═══════ */
+.alert {
+  background: rgba(192, 66, 31, 0.08);
+  border-left: 3px solid var(--accent);
+  padding: 16px 22px;
+  margin-top: 20px;
+  font-size: 0.92rem;
+  color: var(--accent-deep);
+  display: none;
+  font-style: italic;
+}
+
+.alert.show { display: block; }
+
+/* ═══════ MOBILE ═══════ */
+@media (max-width: 880px) {
+  .wrap { padding: 30px 20px 60px; }
+  header { grid-template-columns: 1fr; }
+  .meta { text-align: left; }
+  .intro { grid-template-columns: 1fr; gap: 36px; }
+  .item { grid-template-columns: 1fr; gap: 18px; }
+  .section-header { grid-template-columns: 60px 1fr; gap: 18px; }
+  .section-num { font-size: 3.2rem; }
+  .section-title-block h2 { font-size: 1.6rem; }
+  .likert-btn-label { font-size: 7px; }
+  .likert-btn { padding: 10px 2px; min-height: 56px; }
+  h1 { font-size: 2.4rem; }
+}
+
+@media print {
+  body::before, .progress-bar, .actions, .scale-guide { display: none; }
+  .item { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div>
+      <div class="eyebrow">Instrumento de evaluación · v1.0</div>
+      <h1>Autodiagnóstico de<br><em>habilidades</em> profesionales</h1>
+    </div>
+    <div class="meta">
+      <strong>Modalidad</strong><br>
+      Cuestionario tipo Likert<br>
+      <strong>20 ítems · 4 dimensiones</strong>
+    </div>
+  </header>
+
+  <!-- INTRO -->
+  <div class="intro">
+    <div class="intro-objetivo">
+      <div class="eyebrow">Objetivo</div>
+      <h2>Reconocer fortalezas y áreas de mejora</h2>
+      <p>Este instrumento te permite identificar tu nivel actual en cuatro dimensiones clave del desempeño profesional: liderazgo, comunicación, responsabilidad y resolución de conflictos. Responde con honestidad — los resultados son solo para ti.</p>
+    </div>
+    <div class="scale-guide">
+      <div class="scale-guide-title">Indica qué tan de acuerdo estás con cada afirmación</div>
+      <div class="scale-list">
+        <div class="scale-item">
+          <span class="scale-item-num">1</span>
+          <span class="scale-item-label">Totalmente<br>en desacuerdo</span>
+        </div>
+        <div class="scale-item">
+          <span class="scale-item-num">2</span>
+          <span class="scale-item-label">En<br>desacuerdo</span>
+        </div>
+        <div class="scale-item">
+          <span class="scale-item-num">3</span>
+          <span class="scale-item-label">Ni acuerdo<br>ni desacuerdo</span>
+        </div>
+        <div class="scale-item">
+          <span class="scale-item-num">4</span>
+          <span class="scale-item-label">De<br>acuerdo</span>
+        </div>
+        <div class="scale-item">
+          <span class="scale-item-num">5</span>
+          <span class="scale-item-label">Totalmente<br>de acuerdo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="progress-text">Progreso</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text"><strong id="progressCount">0</strong> / 20</div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <form id="quizForm">
+
+    <!-- SECCIÓN 1: LIDERAZGO -->
+    <div class="section" data-section="liderazgo">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">Dimensión I</div>
+          <h2>Liderazgo</h2>
+          <div class="section-desc">capacidad de influir, motivar y guiar a otros hacia objetivos comunes</div>
+        </div>
+      </div>
+      <div id="items-liderazgo"></div>
+    </div>
+
+    <!-- SECCIÓN 2: COMUNICACIÓN -->
+    <div class="section" data-section="comunicacion">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">Dimensión II</div>
+          <h2>Comunicación</h2>
+          <div class="section-desc">claridad al expresar ideas, escucha activa y adaptación al interlocutor</div>
+        </div>
+      </div>
+      <div id="items-comunicacion"></div>
+    </div>
+
+    <!-- SECCIÓN 3: RESPONSABILIDAD -->
+    <div class="section" data-section="responsabilidad">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">Dimensión III</div>
+          <h2>Responsabilidad</h2>
+          <div class="section-desc">cumplimiento de compromisos, autogestión y rendición de cuentas</div>
+        </div>
+      </div>
+      <div id="items-responsabilidad"></div>
+    </div>
+
+    <!-- SECCIÓN 4: RESOLUCIÓN DE CONFLICTOS -->
+    <div class="section" data-section="conflictos">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">Dimensión IV</div>
+          <h2>Resolución de conflictos</h2>
+          <div class="section-desc">manejo constructivo de desacuerdos y trabajo en equipo bajo tensión</div>
+        </div>
+      </div>
+      <div id="items-conflictos"></div>
+    </div>
+
+    <div class="alert" id="alertBox">Por favor, responde todas las preguntas antes de generar tu diagnóstico.</div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="btnSubmit">Generar diagnóstico →</button>
+      <button type="button" class="btn btn-secondary" id="btnReset">Reiniciar</button>
+    </div>
+
+  </form>
+
+  <!-- RESULTADOS -->
+  <div class="results" id="results">
+
+    <div class="results-header">
+      <div class="eyebrow">Diagnóstico personalizado</div>
+      <h2>Tu <em>perfil</em> de habilidades</h2>
+    </div>
+
+    <div class="summary-grid">
+      <div class="chart-container">
+        <h3>Vista comparativa por dimensión</h3>
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div class="scores-list" id="scoresList"></div>
+    </div>
+
+    <div class="analysis">
+      <div class="analysis-eyebrow">Análisis personal</div>
+      <h3>Tus <em>fortalezas</em> y áreas de mejora</h3>
+      <div class="analysis-content">
+        <div class="analysis-block">
+          <h4>Fortalezas identificadas</h4>
+          <ul id="fortalezasList"></ul>
+        </div>
+        <div class="analysis-block">
+          <h4>Áreas de oportunidad</h4>
+          <ul id="oportunidadesList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="reflection">
+      <div class="reflection-eyebrow">Reflexión guiada</div>
+      <h3>Profundiza tu <em>análisis</em> personal</h3>
+
+      <div class="reflection-question">
+        <label>¿Qué fortaleza identificas como tu mayor recurso profesional y por qué?</label>
+        <textarea placeholder="Escribe tu reflexión..."></textarea>
+      </div>
+
+      <div class="reflection-question">
+        <label>¿Cuál área de oportunidad te comprometes a trabajar primero?</label>
+        <textarea placeholder="Escribe tu reflexión..."></textarea>
+      </div>
+
+      <div class="reflection-question">
+        <label>¿Qué acciones concretas implementarás en las próximas dos semanas para mejorar?</label>
+        <textarea placeholder="Escribe tu plan de acción..."></textarea>
+      </div>
+
+      <div class="reflection-question">
+        <label>¿Cómo medirás tu progreso? (indicadores, fechas, evidencias)</label>
+        <textarea placeholder="Define tus criterios de éxito..."></textarea>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+      <button type="button" class="btn btn-secondary" id="btnRetake">Volver a responder</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  BANCO DE ÍTEMS
+// ═══════════════════════════════════════════════
+const items = {
+  liderazgo: [
+    "Tomo la iniciativa cuando es necesario, sin esperar instrucciones.",
+    "Inspiro confianza y motivo a otros a dar lo mejor de sí.",
+    "Soy capaz de tomar decisiones difíciles asumiendo sus consecuencias.",
+    "Reconozco y valoro las aportaciones de los demás miembros del equipo.",
+    "Mantengo la visión del objetivo común incluso bajo presión."
+  ],
+  comunicacion: [
+    "Expreso mis ideas con claridad y orden, adaptándome a mi audiencia.",
+    "Practico la escucha activa antes de responder o emitir juicios.",
+    "Doy y recibo retroalimentación de manera respetuosa y constructiva.",
+    "Verifico que mi mensaje fue comprendido como yo lo intenté.",
+    "Comunico desacuerdos sin generar hostilidad ni cerrar el diálogo."
+  ],
+  responsabilidad: [
+    "Cumplo con los plazos y compromisos que asumo.",
+    "Reconozco mis errores abiertamente y trabajo para corregirlos.",
+    "Organizo mi tiempo y recursos para cumplir mis obligaciones.",
+    "Asumo la parte que me corresponde sin culpar a otros cuando algo falla.",
+    "Cumplo mis responsabilidades incluso cuando nadie supervisa."
+  ],
+  conflictos: [
+    "Abordo los desacuerdos directamente, sin evadirlos ni acumular tensión.",
+    "Busco entender la perspectiva del otro antes de defender la propia.",
+    "Propongo soluciones que beneficien a ambas partes en una disputa.",
+    "Mantengo la calma y el respeto durante discusiones acaloradas.",
+    "Convierto los conflictos en oportunidades de aprendizaje y mejora."
+  ]
+};
+
+const dimensiones = {
+  liderazgo: { nombre: "Liderazgo", color: "#c1421f" },
+  comunicacion: { nombre: "Comunicación", color: "#b08d3c" },
+  responsabilidad: { nombre: "Responsabilidad", color: "#6b6740" },
+  conflictos: { nombre: "Resolución de conflictos", color: "#8a2e15" }
+};
+
+const escalaLabels = {
+  1: "T. desac.",
+  2: "Desac.",
+  3: "Neutral",
+  4: "Acuerdo",
+  5: "T. acuerdo"
+};
+
+// ═══════════════════════════════════════════════
+//  RENDERIZAR ÍTEMS
+// ═══════════════════════════════════════════════
+let globalIndex = 0;
+Object.keys(items).forEach(dim => {
+  const container = document.getElementById('items-' + dim);
+  items[dim].forEach((texto) => {
+    globalIndex++;
+    const itemHTML = `
+      <div class="item">
+        <div class="item-text">
+          <span class="item-num">${String(globalIndex).padStart(2, '0')}</span>
+          <span>${texto}</span>
+        </div>
+        <div class="likert">
+          ${[1,2,3,4,5].map(v => `
+            <label>
+              <input type="radio" name="${dim}_${globalIndex}" value="${v}">
+              <div class="likert-btn">
+                <span class="likert-btn-num">${v}</span>
+                <span class="likert-btn-label">${escalaLabels[v]}</span>
+              </div>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', itemHTML);
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  PROGRESO
+// ═══════════════════════════════════════════════
+const totalItems = 20;
+function updateProgress() {
+  const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+  const pct = (answered / totalItems) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = answered;
+}
+document.querySelectorAll('input[type="radio"]').forEach(input => {
+  input.addEventListener('change', updateProgress);
+});
+
+// ═══════════════════════════════════════════════
+//  CALCULAR Y MOSTRAR RESULTADOS
+// ═══════════════════════════════════════════════
+let chartInstance = null;
+
+function calcularResultados() {
+  const respuestas = {};
+  let allAnswered = true;
+
+  Object.keys(items).forEach(dim => {
+    respuestas[dim] = [];
+  });
+
+  document.querySelectorAll('.item').forEach((item, idx) => {
+    const inputs = item.querySelectorAll('input[type="radio"]');
+    const dim = inputs[0].name.split('_')[0];
+    const checked = item.querySelector('input[type="radio"]:checked');
+    if (!checked) {
+      allAnswered = false;
+    } else {
+      respuestas[dim].push(parseInt(checked.value));
+    }
+  });
+
+  if (!allAnswered) {
+    document.getElementById('alertBox').classList.add('show');
+    setTimeout(() => document.getElementById('alertBox').classList.remove('show'), 4000);
+    return;
+  }
+
+  const promedios = {};
+  Object.keys(respuestas).forEach(dim => {
+    const sum = respuestas[dim].reduce((a, b) => a + b, 0);
+    promedios[dim] = sum / respuestas[dim].length;
+  });
+
+  renderResultados(promedios);
+}
+
+function getNivel(prom) {
+  if (prom >= 4.5) return { label: "Sobresaliente", desc: "Fortaleza consolidada" };
+  if (prom >= 3.7) return { label: "Desarrollado", desc: "Buen dominio" };
+  if (prom >= 2.8) return { label: "En desarrollo", desc: "Avance moderado" };
+  if (prom >= 2.0) return { label: "Inicial", desc: "Requiere atención" };
+  return { label: "Por desarrollar", desc: "Área prioritaria" };
+}
+
+function renderResultados(promedios) {
+  // Lista de puntajes
+  const scoresList = document.getElementById('scoresList');
+  scoresList.innerHTML = '';
+  Object.keys(promedios).forEach(dim => {
+    const prom = promedios[dim];
+    const nivel = getNivel(prom);
+    const pct = (prom / 5) * 100;
+    scoresList.insertAdjacentHTML('beforeend', `
+      <div class="score-row">
+        <div class="score-row-info">
+          <h4>${dimensiones[dim].nombre}</h4>
+          <div class="level-tag">${nivel.label} · ${nivel.desc}</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:0%" data-target="${pct}"></div></div>
+        </div>
+        <div class="score-number">${prom.toFixed(1)}<span class="denom">/5</span></div>
+      </div>
+    `);
+  });
+
+  // Animar barras
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+  }, 200);
+
+  // Análisis: fortalezas (>=4.0) y oportunidades (<3.5)
+  const fortalezasList = document.getElementById('fortalezasList');
+  const oportunidadesList = document.getElementById('oportunidadesList');
+  fortalezasList.innerHTML = '';
+  oportunidadesList.innerHTML = '';
+
+  const sorted = Object.entries(promedios).sort((a, b) => b[1] - a[1]);
+
+  const fortalezas = sorted.filter(([_, v]) => v >= 4.0);
+  const oportunidades = sorted.filter(([_, v]) => v < 3.5);
+  const intermedias = sorted.filter(([_, v]) => v >= 3.5 && v < 4.0);
+
+  if (fortalezas.length === 0) {
+    // Tomar la más alta como fortaleza relativa
+    const [dim, val] = sorted[0];
+    fortalezasList.innerHTML = `<li><strong>${dimensiones[dim].nombre}</strong> (${val.toFixed(1)}) — tu dimensión más sólida actualmente; sigue cultivándola.</li>`;
+  } else {
+    fortalezas.forEach(([dim, val]) => {
+      const mensajes = {
+        liderazgo: "Tienes capacidad para influir y guiar a otros — apóyate en esto para asumir más responsabilidades formales.",
+        comunicacion: "Tu claridad y escucha son recursos valiosos — úsalos para mediar y articular acuerdos en tu equipo.",
+        responsabilidad: "Tu autogestión y cumplimiento generan confianza — eres una persona en quien el equipo puede apoyarse.",
+        conflictos: "Manejas la tensión de forma constructiva — esta es una habilidad escasa y muy valorada profesionalmente."
+      };
+      fortalezasList.insertAdjacentHTML('beforeend',
+        `<li><strong>${dimensiones[dim].nombre}</strong> (${val.toFixed(1)}/5) — ${mensajes[dim]}</li>`
+      );
+    });
+  }
+
+  if (oportunidades.length === 0 && intermedias.length === 0) {
+    oportunidadesList.innerHTML = `<li>Tu perfil muestra un desarrollo equilibrado en las cuatro dimensiones. Tu reto: pasar del dominio individual al impacto sistémico.</li>`;
+  } else {
+    const todas = oportunidades.length > 0 ? oportunidades : intermedias.slice(-2);
+    todas.forEach(([dim, val]) => {
+      const sugerencias = {
+        liderazgo: "Practica tomar la iniciativa en proyectos pequeños; ofrécete como facilitador en al menos una reunión por semana.",
+        comunicacion: "Trabaja la escucha activa: parafrasea antes de responder. Solicita retroalimentación sobre tu claridad al expresarte.",
+        responsabilidad: "Adopta una herramienta de gestión personal (matriz de Eisenhower, Kanban). Comprométete con plazos públicos.",
+        conflictos: "Estudia el modelo Thomas-Kilmann. Practica la fórmula 'cuando ocurre X, yo siento Y, necesito Z' en desacuerdos."
+      };
+      oportunidadesList.insertAdjacentHTML('beforeend',
+        `<li><strong>${dimensiones[dim].nombre}</strong> (${val.toFixed(1)}/5) — ${sugerencias[dim]}</li>`
+      );
+    });
+  }
+
+  // Gráfico radar
+  if (chartInstance) chartInstance.destroy();
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  chartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: Object.keys(promedios).map(d => dimensiones[d].nombre),
+      datasets: [{
+        label: 'Tu puntaje',
+        data: Object.values(promedios),
+        backgroundColor: 'rgba(192, 66, 31, 0.18)',
+        borderColor: '#c1421f',
+        borderWidth: 2,
+        pointBackgroundColor: '#c1421f',
+        pointBorderColor: '#f4ede0',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        r: {
+          min: 0,
+          max: 5,
+          ticks: {
+            stepSize: 1,
+            color: '#7a7468',
+            font: { family: 'JetBrains Mono', size: 10 },
+            backdropColor: 'transparent'
+          },
+          grid: { color: 'rgba(42, 38, 32, 0.15)' },
+          angleLines: { color: 'rgba(42, 38, 32, 0.2)' },
+          pointLabels: {
+            color: '#1a1814',
+            font: { family: 'Fraunces', size: 13, style: 'italic', weight: '500' }
+          }
+        }
+      }
+    }
+  });
+
+  // Mostrar y hacer scroll
+  document.getElementById('results').classList.add('active');
+  setTimeout(() => {
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+// ═══════════════════════════════════════════════
+//  EVENTOS
+// ═══════════════════════════════════════════════
+document.getElementById('btnSubmit').addEventListener('click', calcularResultados);
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (confirm('¿Seguro que deseas reiniciar todas las respuestas?')) {
+    document.getElementById('quizForm').reset();
+    document.getElementById('results').classList.remove('active');
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+document.getElementById('btnRetake').addEventListener('click', () => {
+  document.getElementById('quizForm').reset();
+  document.getElementById('results').classList.remove('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+updateProgress();
+</script>
+
+</body>
+</html>
